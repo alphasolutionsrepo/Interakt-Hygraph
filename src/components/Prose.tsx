@@ -54,9 +54,9 @@ export function Section({
 
 export function formatDate(value: string | null) {
   if (!value) return "";
-  return new Date(value).toLocaleDateString("en-GB", {
-    day: "numeric",
+  return new Date(value).toLocaleDateString("en-US", {
     month: "long",
+    day: "numeric",
     year: "numeric",
   });
 }

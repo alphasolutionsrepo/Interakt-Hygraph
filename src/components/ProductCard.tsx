@@ -5,9 +5,9 @@ import { pathFor } from "@/hygraph/routes";
 
 export function formatPrice(value: number | null) {
   if (value === null) return "";
-  return new Intl.NumberFormat("en-GB", {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "GBP",
+    currency: "USD",
     maximumFractionDigits: 0,
   }).format(value);
 }
