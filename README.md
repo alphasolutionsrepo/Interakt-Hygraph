@@ -360,7 +360,58 @@ the first save, so complete every tab before clicking Register.
 - Verified end to end through the tunnel: 159 products and 105 content documents re-fed in
   about 6 seconds.
 
-## Phase 2, remaining — the incremental webhook
+## Phase 2, step 6 — incremental sync webhook
+
+`POST /api/hygraph/webhook` keeps the indexes current as content changes.
+
+Registered in Hygraph as **Interakt incremental sync**, trigger actions
+`PUBLISH`, `UNPUBLISH`, `DELETE`, all models, signed with `HYGRAPH_WEBHOOK_SECRET`.
+
+| Hygraph event | What happens |
+|---|---|
+| publish | refetch the entry, upsert it into its index |
+| unpublish / delete | remove it from its index |
+| create / update | ignored — the index only holds published content |
+
+### Design notes
+
+- **Intent comes from `operation`, never the body.** A delete still ships the full pre-delete
+  entry, so sniffing the payload would cheerfully re-index something that was just removed,
+  leaving results that 404.
+- **The payload is not enough to build a document.** Related entries arrive as bare
+  `{ id, __typename }` and localized fields sit in a `localizations` array, so a publish
+  refetches the entry using the same field selection the backfill uses. Both paths therefore
+  produce identical documents.
+- **Deletes go through the bulk endpoint.** `DELETE /documents/:id` 404s for an
+  already-removed document, which would turn a harmless webhook replay into a failing
+  handler. A bulk `delete` is idempotent.
+- **Signature verification uses the raw body.** `verifySignature` parses the `gcms-signature`
+  header (`sign=…, env=…, t=…`) and HMACs `{ Body, EnvironmentName, TimeStamp }`. Re-serialising
+  a parsed body changes the bytes and the check fails.
+- **The site cache is purged first and unconditionally**, before any Interakt call, so keeping
+  the site fresh never depends on the search integration being healthy. Next 16 requires a
+  cacheLife profile: `revalidateTag("hygraph", "max")`.
+- **Webhook scope is all models**; the handler ignores typenames it does not index. Adding a
+  model later needs no webhook change.
+- A publish that cannot be refetched, or whose document is too thin to index, is **removed**
+  rather than left behind as a stale hit.
+
+### Gotchas found registering it
+
+- `triggerActions` are **uppercase** enum values (`PUBLISH`), despite the MCP tool description
+  showing lowercase.
+- `models` wants model **UUIDs**, not apiIds. An empty array means all models.
+- `dry_run` validated a payload that the real submit rejected — dry runs check parameter shape
+  only, the same limitation as schema migrations.
+
+### Verified end to end
+
+Edited an FAQ in Hygraph and published: the new title appeared in the index within seconds.
+Unpublished it: gone from the index on the next check. Restored it: back with the original
+wording, and both indexes still hold 159 and 105 documents.
+
+Unit tests cover signature verification and intent resolution — `npm test`, 12 tests.
+
 
 `/search` is a placeholder, and `#interakt-search` / `#interakt-chat` containers are already
 in the header and layout. Index documents are done (above); ingestion and UI are not.

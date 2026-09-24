@@ -523,11 +523,7 @@ export type IndexableContent = {
   authors: IndexableAuthor[];
 };
 
-export async function getIndexableProducts() {
-  return fetchAllPaged<IndexableProduct>(
-    (first, skip) => ({
-      query: `query IndexProducts($first: Int!, $skip: Int!) {
-        products(first: $first, skip: $skip, orderBy: productName_ASC) {
+const PRODUCT_INDEX_SELECTION = `
           id productName productSlug brand sku material tags
           rating reviewCount inStock productPrice shortDescription
           productDescription { text }
@@ -541,6 +537,51 @@ export async function getIndexableProducts() {
             ... on Decor { decorColor: color }
           } }
           updatedAt publishedAt
+`;
+
+const ARTICLE_INDEX_SELECTION = `
+            id title slug excerpt articleType readingTime postDate tags
+            articleText { text }
+            articleImage { url altText }
+            authors { name title }
+            featuredProducts(first: 5) { productName }
+            updatedAt publishedAt
+`;
+
+const POST_INDEX_SELECTION = `
+            id title slug excerpt postDate readingTime tags
+            content { text }
+            body { text }
+            coverImage { url altText }
+            author { name title }
+            updatedAt publishedAt
+`;
+
+const FAQ_INDEX_SELECTION = `
+            id question slug category
+            answer { text }
+            updatedAt publishedAt
+`;
+
+const POLICY_INDEX_SELECTION = `
+            id title slug summary
+            body { text }
+            updatedAt publishedAt
+`;
+
+const AUTHOR_INDEX_SELECTION = `
+            id name slug title description
+            bio { text }
+            avatar { url altText }
+            updatedAt publishedAt
+`;
+
+export async function getIndexableProducts() {
+  return fetchAllPaged<IndexableProduct>(
+    (first, skip) => ({
+      query: `query IndexProducts($first: Int!, $skip: Int!) {
+        products(first: $first, skip: $skip, orderBy: productName_ASC) {
+${PRODUCT_INDEX_SELECTION}
         }
       }`,
       variables: { first, skip },
@@ -555,12 +596,7 @@ export async function getIndexableContent(): Promise<Omit<IndexableContent, "pro
       (first, skip) => ({
         query: `query IndexArticles($first: Int!, $skip: Int!) {
           articles(first: $first, skip: $skip, orderBy: postDate_DESC) {
-            id title slug excerpt articleType readingTime postDate tags
-            articleText { text }
-            articleImage { url altText }
-            authors { name title }
-            featuredProducts(first: 5) { productName }
-            updatedAt publishedAt
+${ARTICLE_INDEX_SELECTION}
           }
         }`,
         variables: { first, skip },
@@ -571,12 +607,7 @@ export async function getIndexableContent(): Promise<Omit<IndexableContent, "pro
       (first, skip) => ({
         query: `query IndexPosts($first: Int!, $skip: Int!) {
           blogPosts(first: $first, skip: $skip, orderBy: postDate_DESC) {
-            id title slug excerpt postDate readingTime tags
-            content { text }
-            body { text }
-            coverImage { url altText }
-            author { name title }
-            updatedAt publishedAt
+${POST_INDEX_SELECTION}
           }
         }`,
         variables: { first, skip },
@@ -587,9 +618,7 @@ export async function getIndexableContent(): Promise<Omit<IndexableContent, "pro
       (first, skip) => ({
         query: `query IndexFaqs($first: Int!, $skip: Int!) {
           faqItems(first: $first, skip: $skip, orderBy: sortOrder_ASC) {
-            id question slug category
-            answer { text }
-            updatedAt publishedAt
+${FAQ_INDEX_SELECTION}
           }
         }`,
         variables: { first, skip },
@@ -600,9 +629,7 @@ export async function getIndexableContent(): Promise<Omit<IndexableContent, "pro
       (first, skip) => ({
         query: `query IndexPolicies($first: Int!, $skip: Int!) {
           policyPages(first: $first, skip: $skip, orderBy: title_ASC) {
-            id title slug summary
-            body { text }
-            updatedAt publishedAt
+${POLICY_INDEX_SELECTION}
           }
         }`,
         variables: { first, skip },
@@ -613,10 +640,7 @@ export async function getIndexableContent(): Promise<Omit<IndexableContent, "pro
       (first, skip) => ({
         query: `query IndexAuthors($first: Int!, $skip: Int!) {
           authors(first: $first, skip: $skip, orderBy: name_ASC) {
-            id name slug title description
-            bio { text }
-            avatar { url altText }
-            updatedAt publishedAt
+${AUTHOR_INDEX_SELECTION}
           }
         }`,
         variables: { first, skip },
@@ -627,3 +651,63 @@ export async function getIndexableContent(): Promise<Omit<IndexableContent, "pro
 
   return { articles, posts, faqs, policies, authors };
 }
+
+/* -------------------------------------------------------------------------- */
+/* Single-entry fetch, for the webhook                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A webhook payload is not enough to build an index document: related entries
+ * arrive as bare `{ id, __typename }` and localized fields sit in a
+ * `localizations` array. So a publish refetches the entry with the same field
+ * selection the backfill uses, which also guarantees both paths produce
+ * identical documents.
+ *
+ * Reads the PUBLISHED stage — the index only ever holds published content.
+ */
+async function fetchOne<T>(query: string, id: string, key: string): Promise<T | null> {
+  const data = await hygraphFetch<Record<string, T | null>>(query, { id });
+  return data[key] ?? null;
+}
+
+export const getIndexableProductById = (id: string) =>
+  fetchOne<IndexableProduct>(
+    `query IndexProduct($id: ID!) { product(where: { id: $id }) { ${PRODUCT_INDEX_SELECTION} } }`,
+    id,
+    "product",
+  );
+
+export const getIndexableArticleById = (id: string) =>
+  fetchOne<IndexableArticle>(
+    `query IndexArticle($id: ID!) { article(where: { id: $id }) { ${ARTICLE_INDEX_SELECTION} } }`,
+    id,
+    "article",
+  );
+
+export const getIndexablePostById = (id: string) =>
+  fetchOne<IndexablePost>(
+    `query IndexPost($id: ID!) { blogPost(where: { id: $id }) { ${POST_INDEX_SELECTION} } }`,
+    id,
+    "blogPost",
+  );
+
+export const getIndexableFaqById = (id: string) =>
+  fetchOne<IndexableFaq>(
+    `query IndexFaq($id: ID!) { faqItem(where: { id: $id }) { ${FAQ_INDEX_SELECTION} } }`,
+    id,
+    "faqItem",
+  );
+
+export const getIndexablePolicyById = (id: string) =>
+  fetchOne<IndexablePolicy>(
+    `query IndexPolicy($id: ID!) { policyPage(where: { id: $id }) { ${POLICY_INDEX_SELECTION} } }`,
+    id,
+    "policyPage",
+  );
+
+export const getIndexableAuthorById = (id: string) =>
+  fetchOne<IndexableAuthor>(
+    `query IndexAuthor($id: ID!) { author(where: { id: $id }) { ${AUTHOR_INDEX_SELECTION} } }`,
+    id,
+    "author",
+  );
