@@ -1,0 +1,121 @@
+[
+  {
+    "uniqueId": "example:content-field-reference-not-a-real-document",
+    "docType": "journal",
+    "docTypeLabel": "Journal",
+    "title": "My jacket does not seem waterproof any more. Is it broken?",
+    "description": "Yes, and for small tears it is often the best option. Clean the area with an alcohol wipe, then apply a self-adhesive fabric patch cut with rounded corners — square corners peel.",
+    "body": "Materials, factories, repair rates and what we have not solved.\n\nOur position\nThe lowest-impact product is the one you already own. Everything below is about making the things we do sell last as long as possible.\nWe are not going to claim to be sustainable. We make and sell physical goods, which has an environmental cost.\nMaterials\nAll our durable water repellent finishes are PFC-free as of this season. The trade-off is that they degrade faster when exposed to oils and need reproofing more often.\nAll down is RDS-certified and traceable to farm level. All wool is mulesing-free and bought on multi-year contracts directly from four farms rather than at auction.\nOur synthetic insulation and most of our shell fabrics use recycled polyester. We are honest that recycled polyester still sheds microplastics in the wash.\nFactories\nFour factories across Portugal, Vietnam and Lithuania. We publish the full list with locations, worker numbers and length of relationship.\nWe aim to be at least 15% of a factory's output so that we have genuine visibility and leverage. Every contract includes the right to unannounced visits, which we exercise about twice a year.\nWorker turnover is the metric we watch most closely; ours run between 8% and 19% annually.\nRepair and resale\nRepairs are free for three years and available for the life of the product thereafter at materials and shipping only. We repaired 4,180 items last year.\nWe buy back Meridian products for resale, offering 20-40% of current retail as credit depending on condition, and recycle anything beyond repair. We accept other brands' products for recycling without credit.\nRepair rates\nEvery product page publishes how often that item comes back through the repair programme and the three most common reasons. A durability claim is unfalsifiable; a repair rate is not.\nProduction\nWe deliberately under-produce rather than discount or destroy surplus stock. This is why items go out of stock more often than you would expect, and we accept that trade.\nWhat we have not solved\nTier 2 and beyond. We know our fabric mills and have partial visibility into where they buy yarn, and essentially none below that. Anyone claiming complete supply chain transparency at our scale is describing an ambition.\nMicroplastic shedding from synthetic fabrics. A filter bag captures most of it and washing less often helps more, but the problem is not solved.\nAir freight. We use sea freight by default, but we still air freight when a production delay would mean missing a season entirely. It was 4% of units last year and we want it at zero.",
+    "url": "http://localhost:3002/guides/understanding-sleeping-bag-temperature-ratings",
+    "imageUrl": "https://us-east-1-shared-usea1-02.graphassets.com/AfzRlAtQXebZKmmIXtqFAz/resize=width:300/cmudbz7jmtrgw07lf4prucfuf",
+    "imageAlt": "black hiking backpack near white Fujifilm instax mini camera near black leather boots, red half-zip jacket, gray pocket watch on white map",
+    "tags": [
+      "fleece",
+      "mid-layer",
+      "grid",
+      "breathability"
+    ],
+    "contentType": "Care and repair",
+    "author": "Tomas Lindqvist",
+    "authorTitle": "Fit and Sizing Specialist",
+    "readingTime": 4,
+    "relatedProducts": [
+      "Alder Grid Fleece Hoody",
+      "Alder Grid Fleece Heavy",
+      "Alder Grid Fleece Half Zip"
+    ],
+    "updatedAt": "2026-09-22T23:57:31.731997+00:00",
+    "publishedAt": "2026-09-23T14:15:51.426388+00:00"
+  },
+  {
+    "uniqueId": "guide:cmubjucomfixr06li0htzkg0n",
+    "docType": "guide",
+    "docTypeLabel": "Guide",
+    "title": "Why grid fleece works",
+    "description": "The waffle pattern is not decorative. Here is what it is doing.",
+    "body": "The waffle pattern is not decorative. Here is what it is doing.\n\nGrid fleece looks cheaper than flat fleece and outperforms it comprehensively. The pattern is the technology.\nHow it works\nWarmth comes from trapped still air, not from fabric. The raised squares of a grid hold air against your skin — that is the insulation.\nThe channels between the squares are thin and open, and they move moisture vapour out fast. So you get insulation and ventilation from the same layer, which a flat fleece cannot do.\nWhy it matters when moving\nA flat 200-weight fleece is warm and then rapidly too warm. You strip it, get cold, put it back on, repeat.\nA grid fleece of similar warmth vents continuously, so you can leave it on through a climb. Fewer layer changes means a more stable temperature and less sweat in your clothing.\nAgainst skin or over a base layer?\nEither. The grid is soft enough to wear next to skin on cold days, which saves a layer.\nWeights\n100-weight grid\n — three-season, the most versatile.\n200-weight grid\n — winter, or for people who run cold.\nThe limitation\nIt is not windproof at all. The same open structure that vents moisture lets wind straight through.\nPair it with a windshell and you have a two-piece system weighing around 400g that covers a remarkable range of conditions.",
+    "url": "http://localhost:3002/guides/grid-fleece-explained",
+    "imageUrl": "https://us-east-1-shared-usea1-02.graphassets.com/AfzRlAtQXebZKmmIXtqFAz/resize=width:300/cmudbz7jmtrgw07lf4prucfuf",
+    "imageAlt": "Two hikers with backpacks walking along a trail toward snow-capped mountains",
+    "tags": [
+      "fleece",
+      "mid-layer",
+      "grid",
+      "breathability"
+    ],
+    "contentType": "Buying guide",
+    "author": "Marta Vidal",
+    "authorTitle": "Head of Product Testing",
+    "readingTime": 4,
+    "relatedProducts": [
+      "Alder Grid Fleece Hoody",
+      "Alder Grid Fleece Heavy",
+      "Alder Grid Fleece Half Zip"
+    ],
+    "updatedAt": "2026-09-22T23:57:31.731997+00:00",
+    "publishedAt": "2026-12-16T09:00:00+00:00"
+  },
+  {
+    "uniqueId": "journal:cmubjuf7yf1er07k2euau7s9s",
+    "docType": "journal",
+    "docTypeLabel": "Journal",
+    "title": "Learning to navigate in cloud",
+    "description": "Pacing, timing and taking a bearing you actually trust.",
+    "body": "Pacing, timing and taking a bearing you actually trust.\n\nNavigation in clear weather is map reading. Navigation in cloud is a different skill, and the only way to acquire it is to practise it deliberately before you need it.\nThe three techniques\nBearing.\n Take it from the map, walk it with the compass. Simple in principle, and the errors come from not trusting it.\nPacing.\n Count double paces over a measured 100 metres, on flat ground, uphill and downhill. Mine is 62 flat, 68 uphill, 59 downhill. Yours will differ and you must measure it yourself.\nTiming.\n At a known pace, distance takes a predictable time. Naismith's rule — 5km/h plus a minute per 10m of ascent — is a starting point to adjust from experience.\nUsed together, these three let you say 'the cairn is 400 metres away on a bearing of 072, which is 250 double paces and about six minutes'. That is navigation you can act on when you can see forty metres.\nTrusting the compass\nThe hardest part is psychological. In cloud, your sense of direction will tell you, with total conviction, that the compass is wrong.\nIt is not wrong. Walk the bearing.\nThe classic failure is drifting downhill, because walking downhill is easier and feels like progress. On a plateau this puts you in the wrong corrie, which is how most navigation incidents start.\nAttack points and handrails\nDo not navigate to a small feature from far away. Navigate to a large, unmissable feature near it — a stream junction, a wall, a change in slope angle — and then take a short bearing from there.\nA handrail is a linear feature you can follow: a fence, a stream, the edge of a plateau. Following one is far more reliable than a long bearing across open ground.\nAiming off\nIf you are aiming for a bridge on a stream, deliberately aim 100 metres upstream of it. When you hit the stream, you know which way to turn.\nAiming directly at it means that when you arrive at the stream and the bridge is not there, you have no information about direction.\nPractise in good weather\nTake bearings and count paces on a clear day when you can check yourself against what you can see. Building the skill in conditions where an error is harmless is the entire point.\nGPS\nCarry one. Use it to confirm rather than to navigate, and keep the map and compass as the primary system.\nA phone in the cold with a flat battery is a common and predictable failure. Mine has failed twice; the compass never has.",
+    "url": "http://localhost:3002/blog/learning-to-navigate-in-cloud",
+    "imageUrl": "https://us-east-1-shared-usea1-02.graphassets.com/AfzRlAtQXebZKmmIXtqFAz/resize=width:300/cmudbzwi2stmi07ijteh03esr",
+    "imageAlt": "clear and white compass with ruler on map illustration",
+    "tags": [
+      "navigation",
+      "compass",
+      "safety",
+      "skills"
+    ],
+    "contentType": "Journal",
+    "author": "Marta Vidal",
+    "authorTitle": "Head of Product Testing",
+    "readingTime": 9,
+    "updatedAt": "2026-09-22T23:57:34.909055+00:00",
+    "publishedAt": "2026-12-23T09:00:00+00:00"
+  },
+  {
+    "uniqueId": "faq:cmubjs6o2e7uc07l8n7h0a4lj",
+    "docType": "faq",
+    "docTypeLabel": "Help",
+    "title": "How long does delivery take?",
+    "description": "Standard delivery is 2-5 business days in the contiguous US, 4-8 business days to Alaska and Hawaii, and 6-12 business days internationally.",
+    "body": "How long does delivery take?\n\nStandard delivery is 2-5 business days in the contiguous US, 4-8 business days to Alaska and Hawaii, and 6-12 business days internationally.\nExpress delivery is next business day in the contiguous US for orders placed before 3pm ET, and 3-5 business days internationally.\nOrders placed after 3pm ET on Friday are dispatched on Monday. We do not dispatch on weekends or federal holidays.",
+    "url": "http://localhost:3002/faq#how-long-does-delivery-take",
+    "contentType": "Shipping",
+    "updatedAt": "2026-09-22T23:56:46.927549+00:00",
+    "publishedAt": "2026-09-23T14:15:51.426388+00:00"
+  },
+  {
+    "uniqueId": "policy:cmubjs66vevyx07k2kp3pid0t",
+    "docType": "policy",
+    "docTypeLabel": "Policy",
+    "title": "Privacy",
+    "description": "What we collect, why, how long we keep it and how to get it deleted.",
+    "body": "What we collect, why, how long we keep it and how to get it deleted.\n\nWhat we collect\nAccount and order information: name, email, delivery and billing addresses, order history\nPayment information: handled by our payment provider. We store a token, never a full card number\nUsage data: pages visited, searches made, and how you arrived at the site\nCommunications: emails and chat conversations with our support team\nWhy we collect it\nTo fulfil orders, handle returns and repairs, provide support, comply with tax and consumer law, and — only with your consent — to send marketing.\nLawful basis\nOrder fulfilment is processed on the basis of contract. Tax and transaction records are retained to meet a legal obligation. Analytics and marketing are processed on the basis of consent, which you can withdraw at any time.\nHow long we keep it\nOrder and tax records are retained for six years, as required by law. Marketing preferences are retained until you withdraw consent. Analytics data is retained for 14 months. Support conversations are retained for two years.\nWho we share it with\nOur payment provider, our delivery carriers, our email platform and our analytics provider. Each processes data only on our instructions under a data processing agreement.\nWe do not sell personal data, and we do not share it with advertisers.\nYour rights\nYou can request a copy of your data, correct it, delete it, restrict processing, or object to processing. We respond within 30 days.\nRequesting deletion removes everything except the order and tax records we are legally required to retain, which are moved to a restricted archive.\nCookies\nEssential cookies keep your basket and session working and cannot be disabled. Analytics and marketing cookies are set only with your consent, which you can change at any time from the link in the footer.\nContact\nData protection enquiries: privacy@meridiansupply.example. You also have the right to complain to your national data protection authority.",
+    "url": "http://localhost:3002/privacy",
+    "contentType": "Policy",
+    "updatedAt": "2026-09-22T23:56:45.562575+00:00",
+    "publishedAt": "2026-09-23T14:15:51.732306+00:00"
+  },
+  {
+    "uniqueId": "author:cmubjs5urerz407k0wtic8luw",
+    "docType": "author",
+    "docTypeLabel": "Author",
+    "title": "Callum Shaw",
+    "description": "Fastpacking, trail running and lightweight setups.",
+    "body": "Fastpacking, trail running and lightweight setups.\n\nCallum tests the light end of the range: running vests, trail shoes, minimal shelters.\nHe is a former ultrarunner who now covers the same ground more slowly and with better photographs.",
+    "url": "http://localhost:3002/blog",
+    "imageUrl": "https://us-east-1-shared-usea1-02.graphassets.com/AfzRlAtQXebZKmmIXtqFAz/resize=width:300/cmudbz982ssxv07ijglxrhmwv",
+    "imageAlt": "photo of man climbing mountain",
+    "contentType": "Author",
+    "author": "Callum Shaw",
+    "authorTitle": "Field Tester",
+    "updatedAt": "2026-09-22T23:57:35.685662+00:00",
+    "publishedAt": "2026-09-23T14:15:49.10191+00:00"
+  }
+]

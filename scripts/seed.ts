@@ -27,9 +27,14 @@ import { categories, authors } from "./data/taxonomy";
 import { products, legacyProductSlugRewrites } from "./data/products";
 import { articles, blogPosts } from "./data/editorial";
 import { faqs, policies } from "./data/support";
+import {
+  ASSET_PREFIX,
+  allPools,
+  fileNameFor,
+  poolForCategory,
+  poolForTags,
+} from "./data/imagery";
 
-const ASSET_PREFIX = "seed-meridian-";
-const ASSET_COUNT = 40;
 const LOCALE = "es";
 
 const args = process.argv.slice(2);
@@ -55,64 +60,74 @@ function localized(data: Record<string, unknown>) {
 
 type AssetRef = { id: string; fileName: string };
 
+/** poolKey -> asset ids, in pool order. */
+export type AssetIndex = Map<string, string[]>;
+
 async function discoverAssets(): Promise<AssetRef[]> {
-  const data = await gql<{ assets: { id: string; fileName: string }[] }>(
-    `query SeedAssets {
-       assets(first: 100, stage: DRAFT, where: { fileName_starts_with: "${ASSET_PREFIX}" }, orderBy: fileName_ASC) {
-         id fileName
-       }
-     }`,
-  );
-  return data.assets;
+  const out: AssetRef[] = [];
+
+  // Hygraph caps `first` at 100, so this has to page.
+  for (let skip = 0; ; skip += 100) {
+    const data = await gql<{ assets: AssetRef[] }>(
+      `query SeedAssets($skip: Int!) {
+         assets(first: 100, skip: $skip, stage: DRAFT, where: { fileName_starts_with: "${ASSET_PREFIX}" }, orderBy: fileName_ASC) {
+           id fileName
+         }
+       }`,
+      { skip },
+    );
+    out.push(...data.assets);
+    if (data.assets.length < 100) return out;
+  }
 }
 
-async function phase0(): Promise<AssetRef[]> {
+/** Groups discovered assets back into their pools by filename. */
+function indexAssets(assets: AssetRef[]): AssetIndex {
+  const byName = new Map(assets.map((a) => [a.fileName, a.id]));
+  const index: AssetIndex = new Map();
+
+  for (const pool of allPools) {
+    const ids: string[] = [];
+    for (let i = 1; i <= pool.count; i++) {
+      const id = byName.get(fileNameFor(pool.key, i));
+      if (id) ids.push(id);
+    }
+    if (ids.length > 0) index.set(pool.key, ids);
+  }
+
+  return index;
+}
+
+/** Picks from a pool, falling back to any available image so a missing pool never breaks a page. */
+function pick(index: AssetIndex, poolKey: string, offset = 0): string | undefined {
+  const ids = index.get(poolKey);
+  if (ids && ids.length > 0) return ids[offset % ids.length];
+  const any = [...index.values()].flat();
+  return any.length > 0 ? any[offset % any.length] : undefined;
+}
+
+/**
+ * Assets are imported separately by `npm run import-images`, which downloads
+ * from Unsplash and verifies the bytes before uploading. This phase only
+ * discovers what is already there and groups it into pools.
+ */
+async function phase0(): Promise<AssetIndex> {
   console.log("\nPhase 0 — assets");
   const existing = await discoverAssets();
-  const have = new Set(existing.map((a) => a.fileName));
-  console.log(`  found ${existing.length} existing seed assets`);
+  const index = indexAssets(existing);
+  const wanted = allPools.reduce((n, pool) => n + pool.count, 0);
 
-  const missing: number[] = [];
-  for (let i = 1; i <= ASSET_COUNT; i++) {
-    const fileName = `${ASSET_PREFIX}${String(i).padStart(3, "0")}.jpg`;
-    if (!have.has(fileName)) missing.push(i);
+  console.log(`  ${existing.length} of ${wanted} topical assets present, in ${index.size} pools`);
+
+  if (existing.length < wanted) {
+    console.log("  run `npm run import-images -- --commit` to fetch the rest");
   }
 
-  if (missing.length === 0) {
-    console.log("  all assets present, skipping upload");
-    return existing;
+  if (commit && existing.length > 0) {
+    await waitForUploads(existing.slice(0, 100).map((a) => a.id));
   }
 
-  console.log(`  uploading ${missing.length} placeholder images from picsum.photos`);
-
-  const ops: AliasedOp[] = missing.map((i, index) => {
-    const fileName = `${ASSET_PREFIX}${String(i).padStart(3, "0")}.jpg`;
-    return {
-      declarations: [`$a${index}: AssetCreateInput!`],
-      selection: `a${index}: createAsset(data: $a${index}) { id fileName }`,
-      variables: {
-        [`a${index}`]: {
-          uploadUrl: `https://picsum.photos/seed/meridian${i}/1600/1200`,
-          fileName,
-          altText: `Meridian outdoor apparel photograph ${i}`,
-        },
-      },
-    };
-  });
-
-  await runBatched("assets", ops);
-
-  if (!commit) {
-    console.log("  dry run — skipping upload polling");
-    return existing;
-  }
-
-  // Asset creation is async: the url comes back immediately but the bytes are
-  // not there yet, so published pages would render broken images if we
-  // continued straight to products.
-  const created = await discoverAssets();
-  await waitForUploads(created.map((a) => a.id));
-  return created;
+  return index;
 }
 
 async function waitForUploads(ids: string[]) {
@@ -151,9 +166,8 @@ async function waitForUploads(ids: string[]) {
 
 // ---------------------------------------------------------------- phase 1
 
-async function phase1(assets: AssetRef[]) {
+async function phase1(assets: AssetIndex) {
   console.log("\nPhase 1 — categories, authors, policies, FAQs");
-  const asset = (i: number) => assets[i % Math.max(assets.length, 1)]?.id;
 
   // Categories
   await runBatched(
@@ -162,7 +176,8 @@ async function phase1(assets: AssetRef[]) {
       const es = category.es
         ? localized({ categoryName: category.es.name, excerpt: category.es.excerpt })
         : { create: {}, update: {} };
-      const heroId = asset(index + 3);
+      // Category heroes come from that category's own pool.
+      const heroId = pick(assets, poolForCategory(category.slug));
       const base = {
         categoryName: category.name,
         slug: category.slug,
@@ -195,7 +210,8 @@ async function phase1(assets: AssetRef[]) {
   await runBatched(
     "authors",
     authors.map((author, index) => {
-      const avatarId = asset(index + 11);
+      // No portrait pool — authors reuse the generic hiking imagery.
+      const avatarId = pick(assets, "ed-mountain-hiking", index);
       const base = {
         name: author.name,
         slug: author.slug,
@@ -358,6 +374,9 @@ async function phase1b() {
 
   if (pending.length === 0) {
     console.log("  [legacy-products] slugs already rewritten");
+    // The copy still needs checking — the slug rename and the localized copy
+    // are applied by two different mutations.
+    await relabelLegacyProducts();
     return;
   }
 
@@ -370,7 +389,6 @@ async function phase1b() {
         // Distinct create payload per alias — see the note at the top of the file.
         [`gc${index}`]: { productName: rewrite.name, productSlug: rewrite.to },
         [`gu${index}`]: {
-          productName: rewrite.name,
           productSlug: rewrite.to,
           brand: "Meridian",
           inStock: true,
@@ -379,13 +397,62 @@ async function phase1b() {
       },
     })),
   );
+
+  await relabelLegacyProducts();
+}
+
+/**
+ * Rewrites the localized copy on the archive products.
+ *
+ * Separate from the upsert above on purpose: in an upsert's `update` branch
+ * Hygraph applies the non-localized fields (slug, brand, tags) and silently
+ * ignores the localized ones, so these nine entries kept their original
+ * scraped product names while everything else about them changed. A plain
+ * updateProduct does set them.
+ */
+async function relabelLegacyProducts() {
+  const current = await gql<{ products: { id: string; productSlug: string }[] }>(
+    `query LegacyNames {
+       products(first: 100, stage: DRAFT, where: { productSlug_in: ${JSON.stringify(
+         legacyProductSlugRewrites.map((r) => r.to),
+       )} }) { id productSlug }
+     }`,
+  );
+
+  const byId = new Map(current.products.map((p) => [p.productSlug, p.id]));
+  const ops = legacyProductSlugRewrites
+    .filter((rewrite) => byId.has(rewrite.to))
+    .map((rewrite, index) => ({
+      declarations: [`$rl${index}: ProductUpdateInput!`],
+      selection: `rl${index}: updateProduct(where: { id: "${byId.get(rewrite.to)}" }, data: $rl${index}) { id }`,
+      variables: {
+        [`rl${index}`]: {
+          productName: rewrite.name,
+          shortDescription: rewrite.shortDescription,
+          productDescription: md(rewrite.description),
+          seo: {
+            create: {
+              title: `${rewrite.name} | Meridian`,
+              description: rewrite.shortDescription.slice(0, 155),
+            },
+          },
+        },
+      },
+    }));
+
+  if (ops.length === 0) {
+    console.log("  [legacy-names] nothing to relabel");
+    return;
+  }
+
+  await runBatched("legacy-names", ops);
 }
 
 // ---------------------------------------------------------------- phase 2
 
-async function phase2(assets: AssetRef[]) {
+async function phase2(assets: AssetIndex) {
   console.log(`\nPhase 2 — ${products.length} products`);
-  if (assets.length === 0) {
+  if (assets.size === 0) {
     console.log("  no assets available, products will be created without images");
   }
 
@@ -397,12 +464,13 @@ async function phase2(assets: AssetRef[]) {
         shortDescription: product.es!.shortDescription,
       });
 
-      // Round-robin the images with a per-product offset so adjacent cards in a
-      // category grid do not repeat the same photograph.
-      const imageIds =
-        assets.length > 0
-          ? [assets[index % assets.length].id, assets[(index * 7 + 3) % assets.length].id]
-          : [];
+      // Images come from the product family's own pool, so a down jacket shows a
+      // down jacket. The offset varies by position so the five variants of a
+      // family do not all lead with the same photograph.
+      const imageIds = [
+        pick(assets, product.imagePool, index),
+        pick(assets, product.imagePool, index + 1),
+      ].filter((id): id is string => Boolean(id));
 
       const variant = product.variant
         ? {
@@ -464,7 +532,7 @@ async function phase2(assets: AssetRef[]) {
 
 // ---------------------------------------------------------------- phase 3
 
-async function phase3(assets: AssetRef[]) {
+async function phase3(assets: AssetIndex) {
   console.log(`\nPhase 3 — ${articles.length} articles, ${blogPosts.length} blog posts`);
   const productSlugs = new Set(products.map((p) => p.slug));
 
@@ -474,7 +542,8 @@ async function phase3(assets: AssetRef[]) {
       const es = article.es
         ? localized({ title: article.es.title, excerpt: article.es.excerpt })
         : { create: {}, update: {} };
-      const imageId = assets.length ? assets[(index * 3 + 1) % assets.length].id : undefined;
+      // Editorial imagery is chosen from the article's own tags.
+      const imageId = pick(assets, poolForTags(article.tags), index);
       // Only connect products that this seed actually creates.
       const featured = (article.featuredProducts ?? []).filter((s) => productSlugs.has(s));
 
@@ -525,7 +594,7 @@ async function phase3(assets: AssetRef[]) {
       const es = post.es
         ? localized({ title: post.es.title, excerpt: post.es.excerpt })
         : { create: {}, update: {} };
-      const coverId = assets.length ? assets[(index * 5 + 2) % assets.length].id : undefined;
+      const coverId = pick(assets, poolForTags(post.tags), index);
       const body = md(post.body);
 
       const base = {
@@ -569,7 +638,6 @@ async function phase3(assets: AssetRef[]) {
 // ---------------------------------------------------------------- phase 5
 
 const PUBLISH_ORDER: { label: string; mutation: string }[] = [
-  { label: "assets", mutation: "publishManyAssetsConnection" },
   { label: "categories", mutation: "publishManyProductCategoriesConnection" },
   { label: "authors", mutation: "publishManyAuthorsConnection" },
   { label: "products", mutation: "publishManyProductsConnection" },
@@ -579,8 +647,52 @@ const PUBLISH_ORDER: { label: string; mutation: string }[] = [
   { label: "policies", mutation: "publishManyPolicyPagesConnection" },
 ];
 
+/**
+ * Assets are published by explicit id rather than with a blanket filter.
+ *
+ * An asset stuck in ASSET_CREATE_PENDING (one created without ever uploading
+ * bytes) is hidden from content queries but still picked up by an unfiltered
+ * publishMany, which then fails the whole batch with "You tried to publish a
+ * non complete asset". Listing ids first sidesteps it, because the query that
+ * lists them cannot see the broken one either.
+ */
+async function publishAssets() {
+  const ids: string[] = [];
+  for (let skip = 0; ; skip += 100) {
+    const data = await gql<{ assets: { id: string }[] }>(
+      `query PublishableAssets($skip: Int!) {
+         assets(first: 100, skip: $skip, stage: DRAFT, orderBy: createdAt_ASC) { id }
+       }`,
+      { skip },
+    );
+    ids.push(...data.assets.map((a) => a.id));
+    if (data.assets.length < 100) break;
+  }
+
+  let published = 0;
+  for (let i = 0; i < ids.length; i += 100) {
+    const batch = ids.slice(i, i + 100);
+    const data = await gql<{
+      publishManyAssetsConnection: { pageInfo: { pageSize: number } };
+    }>(
+      `mutation PublishAssets($ids: [ID!]) {
+         publishManyAssetsConnection(
+           to: [PUBLISHED] from: DRAFT first: 100
+           where: { id_in: $ids }
+           locales: [en, es] publishBase: true withDefaultLocale: true
+         ) { pageInfo { pageSize } }
+       }`,
+      { ids: batch },
+    );
+    published += data.publishManyAssetsConnection?.pageInfo?.pageSize ?? 0;
+  }
+
+  console.log(`  [assets] published ${published}`);
+}
+
 async function phase5() {
   console.log("\nPhase 5 — publishing");
+  await publishAssets();
   // Dependency order matters: a published product pointing at a draft-only
   // asset or category renders a hole on the CDN.
   for (const { label, mutation } of PUBLISH_ORDER) {
@@ -623,13 +735,14 @@ async function phase5() {
 async function main() {
   console.log(commit ? "Seeding Hygraph (COMMIT)" : "Seeding Hygraph (dry run — pass --commit to write)");
 
-  let assets: AssetRef[] = [];
+  let assets: AssetIndex = new Map();
 
   if (shouldRun("0")) {
     assets = await phase0();
   } else {
-    assets = await discoverAssets();
-    console.log(`\nPhase 0 skipped — reusing ${assets.length} existing assets`);
+    assets = indexAssets(await discoverAssets());
+    const total = [...assets.values()].flat().length;
+    console.log(`\nPhase 0 skipped — reusing ${total} existing assets in ${assets.size} pools`);
   }
 
   if (shouldRun("1")) await phase1(assets);

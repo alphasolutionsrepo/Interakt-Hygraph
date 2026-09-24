@@ -403,3 +403,227 @@ export async function getNavPolicies() {
   );
   return data.policyPages;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Interakt indexing                                                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Everything that goes into a search index, in published form.
+ *
+ * Rich text is selected as `.text` only: Interakt needs plain prose, and the
+ * `raw` AST would index as "[object Object]" with a useless embedding.
+ *
+ * As everywhere in this file, `Product.reviews` and `Product.productStock` are
+ * never selected — they are remote REST fields against a dead host.
+ */
+
+export type IndexableProduct = {
+  id: string;
+  productName: string;
+  productSlug: string;
+  brand: string | null;
+  sku: string | null;
+  material: string | null;
+  tags: string[];
+  rating: number | null;
+  reviewCount: number | null;
+  inStock: boolean | null;
+  productPrice: number | null;
+  shortDescription: string | null;
+  productDescription: { text: string } | null;
+  productCategories: { categoryName: string; slug: string }[];
+  productImage: { url: string; altText: string | null }[];
+  productVariant: {
+    productType: {
+      __typename: string;
+      shoeSize?: string;
+      shoeColor?: string;
+      clothingSize?: string;
+      clothingColor?: string;
+      accessoryColor?: string;
+      decorColor?: string;
+    } | null;
+  } | null;
+  updatedAt: string | null;
+  publishedAt: string | null;
+};
+
+export type IndexableArticle = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  articleType: string | null;
+  readingTime: number | null;
+  postDate: string | null;
+  tags: string[];
+  articleText: { text: string } | null;
+  articleImage: { url: string; altText: string | null } | null;
+  authors: { name: string | null; title: string | null }[];
+  featuredProducts: { productName: string }[];
+  updatedAt: string | null;
+  publishedAt: string | null;
+};
+
+export type IndexablePost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  postDate: string | null;
+  readingTime: number | null;
+  tags: string[];
+  content: { text: string } | null;
+  body: { text: string } | null;
+  coverImage: { url: string; altText: string | null } | null;
+  author: { name: string | null; title: string | null } | null;
+  updatedAt: string | null;
+  publishedAt: string | null;
+};
+
+export type IndexableFaq = {
+  id: string;
+  question: string;
+  slug: string;
+  category: string | null;
+  answer: { text: string } | null;
+  updatedAt: string | null;
+  publishedAt: string | null;
+};
+
+export type IndexablePolicy = {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string | null;
+  body: { text: string } | null;
+  updatedAt: string | null;
+  publishedAt: string | null;
+};
+
+export type IndexableAuthor = {
+  id: string;
+  name: string | null;
+  slug: string;
+  title: string | null;
+  description: string | null;
+  bio: { text: string } | null;
+  avatar: { url: string; altText: string | null } | null;
+  updatedAt: string | null;
+  publishedAt: string | null;
+};
+
+export type IndexableContent = {
+  products: IndexableProduct[];
+  articles: IndexableArticle[];
+  posts: IndexablePost[];
+  faqs: IndexableFaq[];
+  policies: IndexablePolicy[];
+  authors: IndexableAuthor[];
+};
+
+export async function getIndexableProducts() {
+  return fetchAllPaged<IndexableProduct>(
+    (first, skip) => ({
+      query: `query IndexProducts($first: Int!, $skip: Int!) {
+        products(first: $first, skip: $skip, orderBy: productName_ASC) {
+          id productName productSlug brand sku material tags
+          rating reviewCount inStock productPrice shortDescription
+          productDescription { text }
+          productCategories { categoryName slug }
+          productImage(first: 1) { url altText }
+          productVariant { productType {
+            __typename
+            ... on Shoe { shoeSize: size shoeColor: color }
+            ... on Clothing { clothingSize: size clothingColor: color }
+            ... on Accessory { accessoryColor: color }
+            ... on Decor { decorColor: color }
+          } }
+          updatedAt publishedAt
+        }
+      }`,
+      variables: { first, skip },
+    }),
+    (data) => data.products as IndexableProduct[],
+  );
+}
+
+export async function getIndexableContent(): Promise<Omit<IndexableContent, "products">> {
+  const [articles, posts, faqs, policies, authors] = await Promise.all([
+    fetchAllPaged<IndexableArticle>(
+      (first, skip) => ({
+        query: `query IndexArticles($first: Int!, $skip: Int!) {
+          articles(first: $first, skip: $skip, orderBy: postDate_DESC) {
+            id title slug excerpt articleType readingTime postDate tags
+            articleText { text }
+            articleImage { url altText }
+            authors { name title }
+            featuredProducts(first: 5) { productName }
+            updatedAt publishedAt
+          }
+        }`,
+        variables: { first, skip },
+      }),
+      (data) => data.articles as IndexableArticle[],
+    ),
+    fetchAllPaged<IndexablePost>(
+      (first, skip) => ({
+        query: `query IndexPosts($first: Int!, $skip: Int!) {
+          blogPosts(first: $first, skip: $skip, orderBy: postDate_DESC) {
+            id title slug excerpt postDate readingTime tags
+            content { text }
+            body { text }
+            coverImage { url altText }
+            author { name title }
+            updatedAt publishedAt
+          }
+        }`,
+        variables: { first, skip },
+      }),
+      (data) => data.blogPosts as IndexablePost[],
+    ),
+    fetchAllPaged<IndexableFaq>(
+      (first, skip) => ({
+        query: `query IndexFaqs($first: Int!, $skip: Int!) {
+          faqItems(first: $first, skip: $skip, orderBy: sortOrder_ASC) {
+            id question slug category
+            answer { text }
+            updatedAt publishedAt
+          }
+        }`,
+        variables: { first, skip },
+      }),
+      (data) => data.faqItems as IndexableFaq[],
+    ),
+    fetchAllPaged<IndexablePolicy>(
+      (first, skip) => ({
+        query: `query IndexPolicies($first: Int!, $skip: Int!) {
+          policyPages(first: $first, skip: $skip, orderBy: title_ASC) {
+            id title slug summary
+            body { text }
+            updatedAt publishedAt
+          }
+        }`,
+        variables: { first, skip },
+      }),
+      (data) => data.policyPages as IndexablePolicy[],
+    ),
+    fetchAllPaged<IndexableAuthor>(
+      (first, skip) => ({
+        query: `query IndexAuthors($first: Int!, $skip: Int!) {
+          authors(first: $first, skip: $skip, orderBy: name_ASC) {
+            id name slug title description
+            bio { text }
+            avatar { url altText }
+            updatedAt publishedAt
+          }
+        }`,
+        variables: { first, skip },
+      }),
+      (data) => data.authors as IndexableAuthor[],
+    ),
+  ]);
+
+  return { articles, posts, faqs, policies, authors };
+}

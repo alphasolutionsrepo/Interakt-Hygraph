@@ -973,6 +973,7 @@ function expand(): ProductSeed[] {
       out.push({
         slug,
         name,
+        imagePool: family.key,
         brand: family.brand,
         sku: `MER-${slugify(family.key).toUpperCase().slice(0, 6)}-${String(counter).padStart(3, "0")}`,
         price,
@@ -1008,14 +1009,105 @@ export const products: ProductSeed[] = expand();
  * update branch may rewrite productSlug itself — so no orphans are left behind.
  * (Delete is not available through the MCP, so renaming beats recreating.)
  */
-export const legacyProductSlugRewrites: { from: string; to: string; name: string }[] = [
-  { from: "1", to: "wool-blend-slippers", name: "Wool Blend Slippers" },
-  { from: "2", to: "black-leather-shoes", name: "Black Leather Shoes" },
-  { from: "3", to: "blue-running-shoes", name: "Blue Running Shoes" },
-  { from: "4", to: "plaid-flannel-shirt", name: "Plaid Flannel Shirt" },
-  { from: "5", to: "silver-pendant-necklace", name: "Silver Pendant Necklace" },
-  { from: "6", to: "white-cotton-headband", name: "White Cotton Headband" },
-  { from: "11", to: "everyday-canvas-tote", name: "Everyday Canvas Tote" },
-  { from: "112", to: "brass-candle-holder", name: "Brass Candle Holder" },
-  { from: "113", to: "linen-throw-cushion", name: "Linen Throw Cushion" },
+export const legacyProductSlugRewrites: {
+  from: string;
+  to: string;
+  name: string;
+  shortDescription: string;
+  description: string[];
+}[] = [
+  {
+    from: "1",
+    to: "wool-blend-slippers",
+    name: "Wool Blend Slippers",
+    shortDescription: "Felted wool slippers with a suede sole, for the end of a long day.",
+    description: [
+      "An older piece from the Meridian archive, kept because people keep asking for it.",
+      "Felted wool upper with a suede sole that grips a wooden floor without marking it. Wool because it breathes, holds warmth when damp and does not develop the smell that synthetic house shoes do within a fortnight.",
+      "Machine washable on a wool cycle. Dry flat, never on a radiator.",
+    ],
+  },
+  {
+    from: "2",
+    to: "black-leather-shoes",
+    name: "Black Leather Shoes",
+    shortDescription: "Vegetable-tanned leather, Goodyear welted, and resolable indefinitely.",
+    description: [
+      "The first piece of footwear Meridian made, and still the one we are asked about most.",
+      "Full-grain leather, vegetable-tanned in Tuscany over about six weeks rather than two days. The colour deepens with wear instead of cracking.",
+      "Goodyear welted, so the sole is stitched rather than glued and can be replaced indefinitely. We resole them for $58 including return shipping.",
+    ],
+  },
+  {
+    from: "3",
+    to: "blue-running-shoes",
+    name: "Blue Running Shoes",
+    shortDescription: "A road-to-trail shoe with a breathable mesh upper and a 6mm drop.",
+    description: [
+      "An archive road-to-trail shoe, kept in the range for people who want one pair for both.",
+      "Breathable engineered mesh upper, 6mm drop and a shallow 2mm lug that stays comfortable on tarmac while still holding on a dry path.",
+      "Not waterproof, deliberately. It drains and dries instead.",
+    ],
+  },
+  {
+    from: "4",
+    to: "plaid-flannel-shirt",
+    name: "Plaid Flannel Shirt",
+    shortDescription: "Brushed cotton flannel in a muted two-colour check.",
+    description: [
+      "A brushed cotton flannel from the archive, cut slightly long in the body so it stays put when you reach.",
+      "Heavier than a summer shirt and light enough to wear under a fleece. Horn-effect buttons, replaced free under the repair programme.",
+    ],
+  },
+  {
+    from: "5",
+    to: "silver-pendant-necklace",
+    name: "Silver Pendant Necklace",
+    shortDescription: "A recycled sterling silver pendant on a 45cm chain.",
+    description: [
+      "Recycled sterling silver, cast and finished in the UK, on a 45cm chain.",
+      "Silver tarnishes; that is the material behaving normally rather than a fault. A polishing cloth brings it back in a minute.",
+    ],
+  },
+  {
+    from: "6",
+    to: "white-cotton-headband",
+    name: "White Cotton Headband",
+    shortDescription: "An organic cotton headband that keeps sweat out of your eyes.",
+    description: [
+      "Organic cotton terry with a touch of elastane, wide enough to stay put without gripping hard enough to give you a headache.",
+      "Washes with everything else. Loses its shape if you tumble dry it.",
+    ],
+  },
+  {
+    from: "11",
+    to: "everyday-canvas-tote",
+    name: "Everyday Canvas Tote",
+    shortDescription: "Heavyweight recycled canvas with a boxed base and an internal pocket.",
+    description: [
+      "A 16oz recycled cotton canvas tote with a boxed base, so it stands up rather than slumping.",
+      "Webbing handles bar-tacked at the stress points, which is where cheap totes fail first. One internal pocket sized for a phone and keys.",
+    ],
+  },
+  {
+    from: "112",
+    to: "brass-candle-holder",
+    name: "Brass Candle Holder",
+    shortDescription: "Solid turned brass that develops a patina rather than a coating that flakes.",
+    description: [
+      "Solid turned brass, unlacquered, for a standard dinner candle.",
+      "Unlacquered is the point: it develops a patina over years instead of wearing through a coating. If you prefer it bright, a little polish restores it.",
+      "Weighted base, felt underside so it does not scratch a table.",
+    ],
+  },
+  {
+    from: "113",
+    to: "linen-throw-cushion",
+    name: "Linen Throw Cushion",
+    shortDescription: "Washed European linen with a feather inner and a hidden zip.",
+    description: [
+      "Washed European linen, soft from the first use rather than after a year of washing.",
+      "Feather and down inner, hidden zip, and a removable cover that goes in the machine at 30 degrees.",
+    ],
+  },
 ];

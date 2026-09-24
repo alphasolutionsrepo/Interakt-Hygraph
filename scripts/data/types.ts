@@ -34,6 +34,8 @@ export type ProductVariantSeed =
 export type ProductSeed = {
   slug: string;
   name: string;
+  /** Image pool key — the product family, so photos match the subject. */
+  imagePool: string;
   brand: string;
   sku: string;
   price: number;

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeaderSearch } from "@/components/HeaderSearch";
 import { siteName, siteTagline } from "@/hygraph/env";
 
 const NAV = [
@@ -32,8 +33,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        {/* Phase 2 mounts the Interakt search widget here. */}
-        <div className="ml-auto" id="interakt-search" />
+        <HeaderSearch />
       </div>
     </header>
   );

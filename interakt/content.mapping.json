@@ -1,0 +1,302 @@
+{
+  "_version": 1,
+  "_indexName": "hygraph-content",
+  "_searchProvider": "elasticsearch",
+  "fields": [
+    {
+      "fieldName": "uniqueId",
+      "fieldType": "keyword",
+      "displayName": "Unique ID",
+      "isSystemField": true,
+      "isRequired": true,
+      "mapping": {
+        "mode": "reference",
+        "sourceField": null,
+        "transform": "none",
+        "sourceFromField": "uniqueId"
+      },
+      "attributes": {
+        "isSearchable": false,
+        "isFacetable": false,
+        "includeInResponse": true,
+        "boostValue": 0.1,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "docType",
+      "fieldType": "keyword",
+      "displayName": "Type",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "docType",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": false,
+        "isFacetable": true,
+        "includeInResponse": true,
+        "boostValue": 1,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "docTypeLabel",
+      "fieldType": "keyword",
+      "displayName": "Content type",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "docTypeLabel",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": false,
+        "isFacetable": true,
+        "includeInResponse": true,
+        "boostValue": 1,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "title",
+      "fieldType": "text",
+      "displayName": "Title",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "title",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": true,
+        "isFacetable": false,
+        "includeInResponse": true,
+        "boostValue": 9,
+        "isVectorSource": false
+      },
+      "providerFieldSettings": {
+        "isAutocomplete": true
+      }
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "text",
+      "displayName": "Description",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "description",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": true,
+        "isFacetable": false,
+        "includeInResponse": true,
+        "boostValue": 5,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "body",
+      "fieldType": "text",
+      "displayName": "Body",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "body",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": true,
+        "isFacetable": false,
+        "includeInResponse": true,
+        "boostValue": 3,
+        "isVectorSource": true
+      }
+    },
+    {
+      "fieldName": "url",
+      "fieldType": "url",
+      "displayName": "URL",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "url",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": false,
+        "isFacetable": false,
+        "includeInResponse": true,
+        "boostValue": 1,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "imageUrl",
+      "fieldType": "image_url",
+      "displayName": "Image",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "imageUrl",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": false,
+        "isFacetable": false,
+        "includeInResponse": true,
+        "boostValue": 1,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "imageAlt",
+      "fieldType": "keyword",
+      "displayName": "Image alt text",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "imageAlt",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": false,
+        "isFacetable": false,
+        "includeInResponse": true,
+        "boostValue": 1,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "tags",
+      "fieldType": "array",
+      "displayName": "Tags",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "tags",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": true,
+        "isFacetable": true,
+        "includeInResponse": true,
+        "boostValue": 2,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "updatedAt",
+      "fieldType": "datetime",
+      "displayName": "Updated",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "updatedAt",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": false,
+        "isFacetable": false,
+        "includeInResponse": true,
+        "boostValue": 1,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "publishedAt",
+      "fieldType": "datetime",
+      "displayName": "Published",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "publishedAt",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": false,
+        "isFacetable": false,
+        "includeInResponse": true,
+        "boostValue": 1,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "contentType",
+      "fieldType": "keyword",
+      "displayName": "Topic",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "contentType",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": true,
+        "isFacetable": true,
+        "includeInResponse": true,
+        "boostValue": 4,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "author",
+      "fieldType": "keyword",
+      "displayName": "Author",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "author",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": true,
+        "isFacetable": true,
+        "includeInResponse": true,
+        "boostValue": 3,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "authorTitle",
+      "fieldType": "keyword",
+      "displayName": "Author role",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "authorTitle",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": false,
+        "isFacetable": false,
+        "includeInResponse": true,
+        "boostValue": 1,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "readingTime",
+      "fieldType": "number",
+      "displayName": "Reading time",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "readingTime",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": false,
+        "isFacetable": false,
+        "includeInResponse": true,
+        "boostValue": 1,
+        "isVectorSource": false
+      }
+    },
+    {
+      "fieldName": "relatedProducts",
+      "fieldType": "array",
+      "displayName": "Related products",
+      "mapping": {
+        "mode": "source",
+        "sourceField": "relatedProducts",
+        "transform": "none"
+      },
+      "attributes": {
+        "isSearchable": true,
+        "isFacetable": false,
+        "includeInResponse": true,
+        "boostValue": 3,
+        "isVectorSource": false
+      }
+    }
+  ]
+}
