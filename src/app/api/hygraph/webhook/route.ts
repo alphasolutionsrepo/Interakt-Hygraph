@@ -36,8 +36,10 @@ function target(index: WebhookIndex): IngestTarget {
 }
 
 export async function POST(request: Request) {
+  console.log("Received webhook request");
   const secret = process.env.HYGRAPH_WEBHOOK_SECRET;
   if (!secret) {
+    console.error("HYGRAPH_WEBHOOK_SECRET is not configured");
     return NextResponse.json(
       { ok: false, error: "HYGRAPH_WEBHOOK_SECRET is not configured" },
       { status: 500 },
@@ -47,14 +49,20 @@ export async function POST(request: Request) {
   // Read the body as text: verifying against a re-serialised object fails,
   // because JSON.stringify does not reproduce the original bytes.
   const rawBody = await request.text();
+  console.log("Raw body received:", rawBody);
 
   if (!verifySignature(rawBody, request.headers.get("gcms-signature"), secret)) {
+    console.error("Bad signature", {
+      signature: request.headers.get("gcms-signature"),
+      rawBody,
+    });
     return NextResponse.json({ ok: false, error: "Bad signature" }, { status: 401 });
   }
 
   let payload: unknown;
   try {
     payload = JSON.parse(rawBody);
+    console.log("Parsed payload:", payload);
   } catch {
     return NextResponse.json({ ok: false, error: "Body is not JSON" }, { status: 400 });
   }
@@ -88,6 +96,7 @@ export async function POST(request: Request) {
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3002";
     const document = await buildDocumentFor(intent.typename!, intent.entryId!, siteUrl);
+    console.log("Built document:", document);
 
     // A publish we cannot fetch, or one too thin to index, is removed rather
     // than left behind as a stale hit.
@@ -101,11 +110,12 @@ export async function POST(request: Request) {
         reason: document ? "no usable text" : "entry not found in the published stage",
       });
     }
+    console.log("Document is indexable and will be uploaded:", document);
 
     await bulkWrite(t, [
       { action: "upload", document, documentId: document.uniqueId },
     ]);
-
+    console.log("Uploaded document:", document);
     return NextResponse.json({
       ok: true,
       revalidated: true,
